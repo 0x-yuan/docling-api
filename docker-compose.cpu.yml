@@ -25,16 +25,16 @@ services:
       args:
         CPU_ONLY: "true"
     image: converter-cpu-image
-    command: sh -c "poetry run uvicorn --port $${PORT} --host 0.0.0.0 main:app"
+    command: sh -c "poetry run uvicorn --port $${PORT} --host 0.0.0.0 --proxy-headers --forwarded-allow-ips='*' main:app"
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - ENV=production
-      - PORT=${PORT:-4400}
+      - PORT=${PORT:-8082}
       - MALLOC_ARENA_MAX=2
       - OMP_NUM_THREADS=2
       - PYTHONMALLOC=malloc
     ports:
-      - "${PORT:-4400}:${PORT:-4400}"
+      - "${PORT:-8082}:${PORT:-8082}"
     volumes:
       - .:/app
       - model_cache:/tmp
@@ -69,5 +69,20 @@ services:
       - redis
       - celery_worker
 
+  caddy:
+    container_name: caddy
+    image: caddy:2-alpine
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: on-failure
+    depends_on:
+      - app
+
 volumes:
   model_cache:
+  caddy_data:
+  caddy_config:

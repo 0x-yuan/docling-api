@@ -1,0 +1,8 @@
+:8081 {
+    reverse_proxy localhost:4400 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    encode gzip
+}
