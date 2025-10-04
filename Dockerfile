@@ -37,6 +37,8 @@ RUN python -c 'import easyocr; \
 
 COPY . .
 
-EXPOSE 8080
+ENV PORT=4400
 
-CMD ["poetry", "run", "uvicorn", "--port", "8080", "--host", "0.0.0.0", "main:app"]
+EXPOSE ${PORT}
+
+CMD sh -c "poetry run uvicorn --port ${PORT} --host 0.0.0.0 main:app"
